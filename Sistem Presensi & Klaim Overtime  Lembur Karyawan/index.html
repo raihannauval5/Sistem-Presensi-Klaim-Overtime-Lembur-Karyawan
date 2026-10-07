@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Presensi & Klaim Overtime / Lembur Karyawan</title>
+
+  <!-- Google Fonts - Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. GLOBAL & RESET STYLES (Clean Light / Neutral White Theme)
+       ========================================================================== */
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --border-focus: #0f172a;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --btn-primary: #0f172a;
+      --btn-hover: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      padding: 24px 16px;
+      line-height: 1.5;
+    }
+
+    .app-wrapper {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Switcher Role Bar */
+    .view-switcher {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 12px;
+    }
+
+    .switcher-brand {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-main);
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: #f1f5f9;
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--btn-primary);
+      color: #ffffff;
+      border-color: var(--btn-primary);
+    }
+
+    /* Header Component */
+    .header-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .sub-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: #f1f5f9;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .sub-tag.admin-tag {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    .header-card h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .header-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* View Containers */
+    .view-section {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .view-section.active {
+      display: flex;
+    }
+
+    /* 2-Column Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* Card Box */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-header {
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--border-focus);
+    }
+
+    .input-readonly {
+      background-color: #f8fafc !important;
+      font-weight: 600;
+      color: #334155 !important;
+    }
+
+    /* Info Box */
+    .info-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .info-item {
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .info-val {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-submit {
+      width: 100%;
+      background-color: var(--btn-primary);
+      color: #ffffff;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--btn-hover);
+    }
+
+    .btn-reset {
+      background-color: #ffffff;
+      color: #991b1b;
+      border: 1px solid #fee2e2;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-reset:hover {
+      background-color: #fef2f2;
+    }
+
+    /* Cards List (User View) */
+    .overtime-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .overtime-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .overtime-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .overtime-code {
+      font-family: monospace;
+      font-weight: 700;
+      font-size: 13px;
+      background: #f1f5f9;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .status-pending { background-color: #fffbebfb; color: #b45309; border: 1px solid #fef3c7; }
+    .status-disetujui { background-color: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
+    .status-ditolak { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; }
+
+    .overtime-body h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .overtime-body p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 40px 20px;
+      background-color: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+    }
+
+    /* Admin View Stats Bar & Table */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 16px 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kpi-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .kpi-number {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    .toolbar-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-inputs {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .search-inputs input,
+    .search-inputs select {
+      max-width: 240px;
+      padding: 8px 12px;
+      font-size: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
+    .table-frame {
+      overflow-x: auto;
+    }
+
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .table-custom th {
+      background-color: #f8fafc;
+      color: var(--text-muted);
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+    }
+
+    .table-custom td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .select-compact {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Switcher Mode Portal -->
+    <nav class="view-switcher">
+      <span class="switcher-brand">⏱️ Employee Overtime & Attendance System</span>
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchMode('user')">Portal Karyawan</button>
+        <button class="tab-btn" onclick="switchMode('admin')">HR & Payroll Approval</button>
+      </div>
+    </nav>
+
+    <!-- ==========================================================================
+       2. USER PORTAL VIEW
+       ========================================================================== -->
+    <div id="view-user" class="view-section active">
+      <header class="header-card">
+        <span class="sub-tag">Employee Self-Service</span>
+        <h1>Formulir Pengajuan Lembur / Overtime</h1>
+        <p>Catat jam kerja lembur Anda, dapatkan estimasi kompensasi, dan kirim pengajuan ke HR/Manager.</p>
+      </header>
+
+      <main class="main-grid">
+        <!-- Form Klaim Lembur -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Formulir Klaim Lembur</h2>
+          </div>
+
+          <form id="form-overtime">
+            <div class="form-group">
+              <label for="namaKaryawan">Nama Karyawan & NIK</label>
+              <input type="text" id="namaKaryawan" placeholder="Contoh: Budi Santoso (NIK-104)" required>
+            </div>
+
+            <div class="form-group">
+              <label for="divisi">Divisi / Departemen</label>
+              <select id="divisi" required>
+                <option value="">-- Pilih Divisi --</option>
+                <option value="IT & Engineering">IT & Engineering</option>
+                <option value="Digital Marketing">Digital Marketing</option>
+                <option value="Finance & Accounting">Finance & Accounting</option>
+                <option value="Operations & Logistics">Operations & Logistics</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="tanggalLembur">Tanggal Lembur</label>
+              <input type="date" id="tanggalLembur" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jamMulai">Jam Mulai</label>
+                <input type="time" id="jamMulai" required>
+              </div>
+              <div class="form-group">
+                <label for="jamSelesai">Jam Selesai</label>
+                <input type="time" id="jamSelesai" required>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <div class="info-item">
+                <span class="info-label">Total Durasi Lembur:</span>
+                <span id="info-durasi" class="info-val">0 Jam</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Rate Lembur per Jam:</span>
+                <span class="info-val">Rp 35.000 / Jam</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Estimasi Kompensasi:</span>
+                <span id="info-kompensasi" class="info-val" style="color:#0f172a; font-weight:700;">Rp 0</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="pekerjaan">Rincian Pekerjaan / Tugas Lembur</label>
+              <textarea id="pekerjaan" rows="3" placeholder="Jelaskan pengerjaan tugas atau kendala yang diselesaikan..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Kirim Pengajuan Overtime</button>
+          </form>
+        </section>
+
+        <!-- Daftar Pengajuan Saya -->
+        <section class="card">
+          <div class="card-header">
+            <h2>Riwayat Pengajuan Lembur Saya</h2>
+          </div>
+
+          <div class="overtime-list" id="container-overtime-user">
+            <div class="empty-state">
+              <p>Belum ada klaim lembur yang diajukan. Silakan isi formulir.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ==========================================================================
+       3. HR & PAYROLL APPROVAL VIEW
+       ========================================================================== -->
+    <div id="view-admin" class="view-section">
+      <header class="header-card">
+        <span class="sub-tag admin-tag">HR Approval</span>
+        <h1>Dashboard Verifikasi & Persetujuan Lembur</h1>
+        <p>Tinjau laporan durasi lembur karyawan, verifikasi kompensasi, dan berikan persetujuan untuk Payroll.</p>
+      </header>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-title">Total Klaim</span>
+          <span class="kpi-number" id="stat-total">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Menunggu Verifikasi</span>
+          <span class="kpi-number" id="stat-pending">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Disetujui HR</span>
+          <span class="kpi-number" id="stat-disetujui">0</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-title">Total Biaya Lembur</span>
+          <span class="kpi-number" id="stat-biaya" style="font-size:20px;">Rp 0</span>
+        </div>
+      </div>
+
+      <section class="card">
+        <div class="toolbar-flex">
+          <div class="search-inputs">
+            <input type="text" id="admin-search" placeholder="Cari Kode, NIK, Nama, Divisi..." onkeyup="renderAdminTable()">
+            <select id="admin-filter-status" onchange="renderAdminTable()">
+              <option value="semua">Semua Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Disetujui">Disetujui</option>
+              <option value="Ditolak">Ditolak</option>
+            </select>
+          </div>
+          <button class="btn-reset" onclick="resetDatabase()">Reset Riwayat Overtime</button>
+        </div>
+
+        <div class="table-frame">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Kode & Karyawan</th>
+                <th>Divisi & Task</th>
+                <th>Waktu & Durasi</th>
+                <th>Kompensasi</th>
+                <th>Status & Aksi Approval</th>
+              </tr>
+            </thead>
+            <tbody id="tabel-admin-body">
+              <!-- Render via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+     4. JAVASCRIPT LOGIC
+     ========================================================================== -->
+  <script>
+    const STORAGE_KEY_OVERTIME = 'DATA_EMPLOYEE_OVERTIME_APP';
+    const RATE_PER_HOUR = 35000; // Rate standar lembur/jam
+
+    // DOM Elements
+    const formOvertime = document.getElementById('form-overtime');
+    const jamMulai = document.getElementById('jamMulai');
+    const jamSelesai = document.getElementById('jamSelesai');
+    const infoDurasi = document.getElementById('info-durasi');
+    const infoKompensasi = document.getElementById('info-kompensasi');
+    const containerOvertimeUser = document.getElementById('container-overtime-user');
+
+    // Init App
+    window.addEventListener('DOMContentLoaded', () => {
+      const inputTanggal = document.getElementById('tanggalLembur');
+      if (inputTanggal) {
+        inputTanggal.valueAsDate = new Date();
+      }
+      renderUserOvertime();
+      renderAdminTable();
+    });
+
+    // Switch View (User <-> Admin)
+    function switchMode(mode) {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+
+      document.getElementById('view-user').classList.remove('active');
+      document.getElementById('view-admin').classList.remove('active');
+
+      if (mode === 'user') {
+        document.getElementById('view-user').classList.add('active');
+        tabBtns[0].classList.add('active');
+        renderUserOvertime();
+      } else {
+        document.getElementById('view-admin').classList.add('active');
+        tabBtns[1].classList.add('active');
+        renderAdminTable();
+      }
+    }
+
+    // Kalkulasi Durasi & Kompensasi
+    if (jamMulai) jamMulai.addEventListener('change', hitungKompensasi);
+    if (jamSelesai) jamSelesai.addEventListener('change', hitungKompensasi);
+
+    function hitungKompensasi() {
+      const vMulai = jamMulai.value;
+      const vSelesai = jamSelesai.value;
+
+      if (vMulai && vSelesai) {
+        const [hMulai, mMulai] = vMulai.split(':').map(Number);
+        const [hSelesai, mSelesai] = vSelesai.split(':').map(Number);
+
+        let totalMenit = (hSelesai * 60 + mSelesai) - (hMulai * 60 + mMulai);
+
+        if (totalMenit <= 0) {
+          infoDurasi.innerText = '0 Jam (Waktu Salah)';
+          infoKompensasi.innerText = 'Rp 0';
+          return 0;
+        }
+
+        const jam = Math.floor(totalMenit / 60);
+        const menit = totalMenit % 60;
+        const totalJamDesimal = totalMenit / 60;
+
+        infoDurasi.innerText = `${jam} Jam ${menit} Menit`;
+
+        const totalBiaya = Math.round(totalJamDesimal * RATE_PER_HOUR);
+        infoKompensasi.innerText = `Rp ${totalBiaya.toLocaleString('id-ID')}`;
+
+        return { durasiStr: `${jam} Jam ${menit} Mnt`, totalBiaya };
+      }
+
+      infoDurasi.innerText = '0 Jam';
+      infoKompensasi.innerText = 'Rp 0';
+      return 0;
+    }
+
+    // Submit Overtime
+    if (formOvertime) {
+      formOvertime.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const namaKaryawan = document.getElementById('namaKaryawan').value.trim();
+        const divisi = document.getElementById('divisi').value;
+        const tanggal = document.getElementById('tanggalLembur').value;
+        const vMulai = jamMulai.value;
+        const vSelesai = jamSelesai.value;
+        const pekerjaan = document.getElementById('pekerjaan').value.trim();
+
+        const calc = hitungKompensasi();
+        if (!calc || calc === 0) {
+          alert('Jam selesai harus lebih akhir dari jam mulai!');
+          return;
+        }
+
+        const kodeOvt = 'OVT-' + Math.floor(1000 + Math.random() * 9000);
+
+        const overtimeBaru = {
+          id: Date.now().toString(),
+          kode: kodeOvt,
+          nama: namaKaryawan,
+          divisi: divisi,
+          tanggal: tanggal,
+          jamMulai: vMulai,
+          jamSelesai: vSelesai,
+          durasi: calc.durasiStr,
+          kompensasi: calc.totalBiaya,
+          pekerjaan: pekerjaan,
+          status: 'Pending',
+          waktuPengajuan: new Date().toLocaleDateString('id-ID')
+        };
+
+        const listOvertime = JSON.parse(localStorage.getItem(STORAGE_KEY_OVERTIME)) || [];
+        listOvertime.unshift(overtimeBaru);
+        localStorage.setItem(STORAGE_KEY_OVERTIME, JSON.stringify(listOvertime));
+
+        alert(`Klaim Lembur Berhasil Dikirim!\nKode Klaim: ${kodeOvt}\nMenunggu persetujuan HR.`);
+        formOvertime.reset();
+        infoDurasi.innerText = '0 Jam';
+        infoKompensasi.innerText = 'Rp 0';
+        renderUserOvertime();
+      });
+    }
+
+    // Render Overtime List (User)
+    function renderUserOvertime() {
+      if (!containerOvertimeUser) return;
+
+      const listOvertime = JSON.parse(localStorage.getItem(STORAGE_KEY_OVERTIME)) || [];
+      containerOvertimeUser.innerHTML = '';
+
+      if (listOvertime.length === 0) {
+        containerOvertimeUser.innerHTML = `
+          <div class="empty-state">
+            <p>Belum ada klaim lembur yang diajukan. Silakan isi formulir.</p>
+          </div>
+        `;
+        return;
+      }
+
+      listOvertime.forEach(item => {
+        const statusClass = item.status.toLowerCase();
+        const cardHtml = `
+          <div class="overtime-item">
+            <div class="overtime-head">
+              <span class="overtime-code">${item.kode}</span>
+              <span class="status-badge status-${statusClass}">${item.status}</span>
+            </div>
+            <div class="overtime-body">
+              <h3>${item.nama} — <small>${item.divisi}</small></h3>
+              <p><strong>Waktu:</strong> ${item.tanggal} (${item.jamMulai} - ${item.jamSelesai} / ${item.durasi})</p>
+              <p><strong>Estimasi:</strong> Rp ${(item.kompensasi || 0).toLocaleString('id-ID')}</p>
+              <p><strong>Tugas:</strong> ${item.pekerjaan}</p>
+            </div>
+          </div>
+        `;
+        containerOvertimeUser.innerHTML += cardHtml;
+      });
+    }
+
+    // Render Table & KPI (Admin)
+    function renderAdminTable() {
+      const tabelAdminBody = document.getElementById('tabel-admin-body');
+      if (!tabelAdminBody) return;
+
+      const listOvertime = JSON.parse(localStorage.getItem(STORAGE_KEY_OVERTIME)) || [];
+
+      // Update KPI Stats
+      document.getElementById('stat-total').innerText = listOvertime.length;
+      document.getElementById('stat-pending').innerText = listOvertime.filter(o => o.status === 'Pending').length;
+      document.getElementById('stat-disetujui').innerText = listOvertime.filter(o => o.status === 'Disetujui').length;
+
+      // Hitung Total Kompensasi yang Disetujui
+      const totalBiayaDisetujui = listOvertime
+        .filter(o => o.status === 'Disetujui')
+        .reduce((acc, curr) => acc + (curr.kompensasi || 0), 0);
+
+      document.getElementById('stat-biaya').innerText = `Rp ${totalBiayaDisetujui.toLocaleString('id-ID')}`;
+
+      const query = document.getElementById('admin-search').value.toLowerCase();
+      const selectedStatus = document.getElementById('admin-filter-status').value;
+
+      const filtered = listOvertime.filter(item => {
+        const matchText = (item.kode || '').toLowerCase().includes(query) ||
+                          (item.nama || '').toLowerCase().includes(query) ||
+                          (item.divisi || '').toLowerCase().includes(query);
+        const matchStatus = selectedStatus === 'semua' || item.status === selectedStatus;
+        return matchText && matchStatus;
+      });
+
+      tabelAdminBody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tabelAdminBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state">Tidak ada data klaim lembur.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <span class="overtime-code">${item.kode}</span><br>
+            <strong>${item.nama}</strong>
+          </td>
+          <td>
+            <strong>${item.divisi}</strong><br>
+            <small style="color:#64748b">${item.pekerjaan}</small>
+          </td>
+          <td>
+            ${item.tanggal}<br>
+            <small style="color:#64748b">${item.jamMulai} - ${item.jamSelesai} (${item.durasi})</small>
+          </td>
+          <td><strong>Rp ${(item.kompensasi || 0).toLocaleString('id-ID')}</strong></td>
+          <td>
+            <select class="select-compact" onchange="updateStatusOvertime('${item.id}', this.value)">
+              <option value="Pending" ${item.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Disetujui" ${item.status === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
+              <option value="Ditolak" ${item.status === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
+            </select>
+          </td>
+        `;
+        tabelAdminBody.appendChild(tr);
+      });
+    }
+
+    // Update Status Overtime dari Admin
+    function updateStatusOvertime(id, statusBaru) {
+      let listOvertime = JSON.parse(localStorage.getItem(STORAGE_KEY_OVERTIME)) || [];
+      const idx = listOvertime.findIndex(o => o.id === id);
+
+      if (idx !== -1) {
+        listOvertime[idx].status = statusBaru;
+        localStorage.setItem(STORAGE_KEY_OVERTIME, JSON.stringify(listOvertime));
+        renderAdminTable();
+      }
+    }
+
+    // Reset Database
+    function resetDatabase() {
+      if (confirm('Hapus seluruh riwayat klaim lembur?')) {
+        localStorage.removeItem(STORAGE_KEY_OVERTIME);
+        renderAdminTable();
+        renderUserOvertime();
+      }
+    }
+  </script>
+</body>
+</html>
